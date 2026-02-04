@@ -9,7 +9,6 @@ const Index = () => {
   const navigate = useNavigate();
   const { createRoom } = useRoom(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [artUrl, setArtUrl] = useState<string | null>(null);
   const [subtitleUrl, setSubtitleUrl] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [joinCode, setJoinCode] = useState('');
@@ -18,7 +17,7 @@ const Index = () => {
     if (!videoUrl) return;
     
     setIsCreating(true);
-    const roomCode = await createRoom(videoUrl, artUrl || undefined, subtitleUrl || undefined);
+    const roomCode = await createRoom(videoUrl, subtitleUrl || undefined);
     
     if (roomCode) {
       navigate(`/room/${roomCode}`);
@@ -81,20 +80,12 @@ const Index = () => {
                 onClear={() => setVideoUrl(null)}
               />
 
-              <div className="grid grid-cols-2 gap-4">
-                <FileUploader
-                  type="art"
-                  onUploadComplete={setArtUrl}
-                  currentFile={artUrl}
-                  onClear={() => setArtUrl(null)}
-                />
-                <FileUploader
-                  type="subtitle"
-                  onUploadComplete={setSubtitleUrl}
-                  currentFile={subtitleUrl}
-                  onClear={() => setSubtitleUrl(null)}
-                />
-              </div>
+              <FileUploader
+                type="subtitle"
+                onUploadComplete={setSubtitleUrl}
+                currentFile={subtitleUrl}
+                onClear={() => setSubtitleUrl(null)}
+              />
             </div>
 
             <button

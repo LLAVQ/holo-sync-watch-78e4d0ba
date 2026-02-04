@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
-import { Upload, Film, Image, FileText, X, Loader2 } from 'lucide-react';
+import { Film, FileText, X, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
 interface FileUploaderProps {
-  type: 'video' | 'art' | 'subtitle';
+  type: 'video' | 'subtitle';
   onUploadComplete: (url: string) => void;
   currentFile?: string | null;
   onClear?: () => void;
@@ -15,27 +15,22 @@ const FileUploader = ({ type, onUploadComplete, currentFile, onClear }: FileUplo
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const config = {
     video: {
       accept: '.mp4,.webm,.mov,.mkv',
       icon: Film,
       label: 'Video File',
-      hint: 'MP4, WebM, MOV up to 500MB',
+      hint: 'MP4, WebM, MOV up to 10GB',
       bucket: 'videos',
-    },
-    art: {
-      accept: '.jpg,.jpeg,.png,.webp,.gif',
-      icon: Image,
-      label: 'Cover Art',
-      hint: 'JPG, PNG, WebP up to 10MB',
-      bucket: 'art',
+      maxSize: 10 * 1024 * 1024 * 1024,
     },
     subtitle: {
       accept: '.vtt,.srt',
       icon: FileText,
-      label: 'Subtitles',
-      hint: 'VTT or SRT files',
+      label: 'Subtitles (optional)',
+      hint: 'Optional VTT or SRT file',
       bucket: 'subtitles',
     },
   }[type];
@@ -45,11 +40,21 @@ const FileUploader = ({ type, onUploadComplete, currentFile, onClear }: FileUplo
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
+    setErrorMessage(null);
     const file = e.dataTransfer.files[0];
     if (file) handleUpload(file);
   }, []);
 
   const handleUpload = async (file: File) => {
+    setErrorMessage(null);
+    if (config.maxSize && file.size > config.maxSize) {
+      setFileName(null);
+      setIsUploading(false);
+      const sizeInGb = (config.maxSize / (1024 * 1024 * 1024)).toFixed(0);
+      setErrorMessage(`File exceeds the ${sizeInGb}GB upload limit.`);
+      return;
+    }
+
     setIsUploading(true);
     setProgress(0);
     setFileName(file.name);
@@ -80,6 +85,7 @@ const FileUploader = ({ type, onUploadComplete, currentFile, onClear }: FileUplo
     } catch (err) {
       console.error('Upload failed:', err);
       setFileName(null);
+      setErrorMessage('Upload failed. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -103,6 +109,7 @@ const FileUploader = ({ type, onUploadComplete, currentFile, onClear }: FileUplo
             <button
               onClick={() => {
                 setFileName(null);
+                setErrorMessage(null);
                 onClear();
               }}
               className="p-1 rounded-md hover:bg-secondary transition-colors"
@@ -157,6 +164,10 @@ const FileUploader = ({ type, onUploadComplete, currentFile, onClear }: FileUplo
             )}
           </div>
         </div>
+      )}
+
+      {errorMessage && (
+        <p className="text-xs text-destructive">{errorMessage}</p>
       )}
     </div>
   );

@@ -74,6 +74,16 @@ const Room = () => {
     }
   };
 
+  const handleSubtitleClear = async () => {
+    setSubtitleUrl(null);
+    if (room) {
+      await supabase
+        .from('rooms')
+        .update({ subtitle_url: null })
+        .eq('id', room.id);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen cinema-gradient flex items-center justify-center">
@@ -143,7 +153,6 @@ const Room = () => {
           <div className="space-y-4 animate-fade-in">
             <VideoPlayer
               videoUrl={room.video_url || ''}
-              artUrl={room.art_url}
               subtitleUrl={subtitleUrl}
               isPlaying={isPlaying}
               playbackTime={playbackTime}
@@ -168,12 +177,12 @@ const Room = () => {
 
             {/* Subtitle Upload */}
             <div className="glass-card rounded-xl p-6">
-              <h3 className="font-semibold mb-4">Add Subtitles</h3>
+              <h3 className="font-semibold mb-4">Add Subtitles (optional)</h3>
               <FileUploader
                 type="subtitle"
                 onUploadComplete={handleSubtitleUpload}
                 currentFile={subtitleUrl}
-                onClear={() => setSubtitleUrl(null)}
+                onClear={handleSubtitleClear}
               />
             </div>
           </div>
