@@ -5,7 +5,6 @@ import { formatTime, SYNC_THRESHOLD } from '@/lib/roomUtils';
 
 interface VideoPlayerProps {
   videoUrl: string;
-  artUrl?: string | null;
   subtitleUrl?: string | null;
   isPlaying: boolean;
   playbackTime: number;
@@ -17,7 +16,6 @@ interface VideoPlayerProps {
 
 const VideoPlayer = ({
   videoUrl,
-  artUrl,
   subtitleUrl,
   isPlaying,
   playbackTime,
@@ -178,18 +176,6 @@ const VideoPlayer = ({
       onMouseMove={resetControlsTimeout}
       onMouseLeave={() => hasStarted && isPlaying && setShowControls(false)}
     >
-      {/* Cover Art (before video starts) */}
-      {!hasStarted && artUrl && (
-        <div className="absolute inset-0 z-10">
-          <img
-            src={artUrl}
-            alt="Video cover"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        </div>
-      )}
-
       {/* Video Element */}
       <video
         ref={videoRef}

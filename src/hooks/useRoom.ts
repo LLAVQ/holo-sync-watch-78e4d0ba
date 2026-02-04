@@ -122,7 +122,6 @@ export const useRoom = (roomCode: string | null) => {
   // Create a new room
   const createRoom = useCallback(async (
     videoUrl: string,
-    artUrl?: string,
     subtitleUrl?: string
   ): Promise<string | null> => {
     const code = generateRoomCode();
@@ -132,7 +131,6 @@ export const useRoom = (roomCode: string | null) => {
       .insert({
         code,
         video_url: videoUrl,
-        art_url: artUrl || null,
         subtitle_url: subtitleUrl || null,
         host_id: userId.current,
       })
